@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #define BOARDSIZE 9
 #define BOARDSQR (int)sqrt(BOARDSIZE)
@@ -37,10 +38,16 @@ typedef struct node {
 // ##### FUNCTION DECLARATIONS #####
 
 // Solve Board
-void solveBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int row, int col );
+void solveBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS );
 
 // Print board
-void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE] );
+void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS );
+
+// Flush input buffer after fgets length is met
+void flush_input();
+
+// Check if every character in a string is digit or not
+bool stringDigit(char *str, int strlength);
 
 // ##### MAIN FUNCTION #####
 int main(int argc, char *argv[]){
@@ -63,38 +70,89 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-    // Prompt user for their board inputs
-    bool valAddDone = 0;
-
     // Initialize row col and value temp values
     int r = 0, c = 0, v = 1;
 
+
+    int digitsBS = 0;
+    int tempBS = BOARDSIZE;
+
+    do{
+        tempBS = (int) tempBS / 10;
+        digitsBS += 1;
+    }while((int) tempBS / 10 > 0);
+
+    char input[digitsBS + 1];
+
+    // Create a validator bit to ensure the user input is correct
+    bool validate, valUserData = 0;
+
     // Initialize the completed char
-    char done;
-    while( !valAddDone ){
+    //char done;
+    while( !valUserData ){
         // Print current board state
-        printBoard( puzzle );
+         printBoard( puzzle, digitsBS );
 
         // Prompt user for row, col, and value of each known number of the puzzle
-        // TODO: Validity check these inputs
-        printf("Please input the column of the number.\n");
-        scanf("%d", &c);
-        printf("Please input the row of the number.\n");
-        scanf("%d", &r);
-        printf("Please input the number.\n");
-        scanf("%d", &v);
-        printf("If you would like to add another number type 'n' or 'N'. Otherwise type 'y' or 'Y' for the puzzle to be solved.\n");
-        scanf(" %c", &done );
+        // Check that the user inputs a value between 1 and BOARDSIZE
+       do{
+            printf("Please input the col of the number.\n");
+            // Get user input with an added char in buffer for the \0 character
+	        fgets( input, digitsBS + 1, stdin );
+            // Flush any chars left in the buffer to avoid buffer overread 
+            flush_input();
+            // Check that every char in the string is a char
+            validate = stringDigit(input, strlen(input) );
+            if( validate )
+                // Convert the string to an int
+                c = atoi(input);
+                validate = ( c <= BOARDSIZE && c > 0 );
+            if( !validate )
+                printf("Please input a number between 1 and %d.\n", BOARDSIZE );
+        } while( !validate );
+        
+       do{
+            printf("Please input the row of the number.\n");
+            // Get user input with an added char in buffer for the \0 character
+	        fgets( input, digitsBS + 1, stdin );
+            // Flush any chars left in the buffer to avoid buffer overread 
+            flush_input();
+            // Check that every char in the string is a char
+            validate = stringDigit(input, strlen(input) );
+            if( validate )
+                // Convert the string to an int
+                r = atoi(input);
+                validate = ( c <= BOARDSIZE && c > 0 );
+            if( !validate )
+                printf("Please input a number between 1 and %d.\n", BOARDSIZE);
+        } while( !validate );
 
-        // Do the loop again for the user to input another value if they want
+       do{
+            printf("Please input the number.\n");
+            // Get user input with an added char in buffer for the \0 character
+	        fgets( input, digitsBS + 1, stdin );
+            // Flush any chars left in the buffer to avoid buffer overread 
+            flush_input();
+            // Check that every char in the string is a char
+            validate = stringDigit(input, strlen(input) );
+            if( validate )
+                // Convert the string to an int
+                v = atoi(input);
+                validate = ( c <= BOARDSIZE && c > 0 );
+            if( !validate )
+                printf("Please input a number between 1 and %d.\n", BOARDSIZE);
+        } while( !validate );
+
+        printf("Type 'Y' or 'y' if you would like to solve the puzzle. Otherwise type any character to add another value to the table.\n");
+        // Get user input with an added char in buffer for the \0 character
+        fgets( input, 2, stdin );
+        // Flush any chars left in the buffer to avoid buffer overread 
+        flush_input();
+
+        // Add the user's value to the board
         puzzle[BOARDSIZE - r][c - 1] = v;
-        if( done == 'n' || done == 'N' ){
-            valAddDone = 0;
-        } else {
-            if( done == 'y' || done == 'Y' ){
-                valAddDone = 1;
-            }
-        }
+        valUserData = ( input[0] == 'y' || input[0] == 'Y' );
+
     }
 
 	// Takes user inputs and places them in row column order from bottom left to top right
@@ -108,13 +166,13 @@ int main(int argc, char *argv[]){
 	printf("UNSOLVED PUZZLE!\n");
 
 	//Print unsolved puzzle
-	printBoard(puzzle);
+	printBoard( puzzle, digitsBS);
 	
 	//Seperate space and label solved puzzle
 	printf("\nSOLVED PUZZLE!\n");
 
 	// Solve puzzle
-	solveBoard(puzzle, 0, 0);
+	solveBoard(puzzle, digitsBS);
 
 	return 0;
 }
@@ -122,9 +180,9 @@ int main(int argc, char *argv[]){
 // ##### FUNCTION DEFINITIONS #####
 
 // Solve Board
-void solveBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int row, int col ){
+void solveBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
 
-	short int curVal = 0;
+	short int curVal = 0, row = 0, col = 0;
 	int sqrRow, sqrCol, count = 0;
 	bool match;
 
@@ -270,7 +328,7 @@ void solveBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int row, int col ){
         }
 	} // End of while loop
     //Print the final completed board
-    printBoard(puzzle);
+    printBoard(puzzle, digitsBS);
 
     // Loop to the end of the linked list
     curNode = head;
@@ -285,15 +343,9 @@ void solveBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int row, int col ){
 }
 
 // Print Board
-void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE] ){
-    int temp, tempBS, digitsTemp, digitsDiff, digitsBS = 0;
+void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
+    int temp, tempBS, digitsTemp, digitsDiff;
 
-    tempBS = BOARDSIZE;
-
-    while((int) tempBS / 10 > 0){
-        tempBS = (int) tempBS / 10;
-        digitsBS += 1;
-    }
 
     //prints board contents
     for( int i = 0; i < BOARDSIZE; i++ ){
@@ -348,6 +400,7 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE] ){
             temp++;
         }
 
+        // TODO: Adjust number of spaces printed to make column align
         printf("%d ", BOARDSIZE - i);
 
         for( int j = 0; j < BOARDSIZE; j++ ){
@@ -361,19 +414,17 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE] ){
                 printf( "| " );
             }
 
-            //print spaces before number to align columns
             temp = (int) puzzle[i][j];
-            tempBS = BOARDSIZE;
-
             digitsTemp = 0;
 
-            while((int) temp / 10 > 0){
+            do{
                 temp = (int) temp / 10;
                 digitsTemp += 1;
-            }
+            }while((int) temp / 10 > 0);
+
             digitsDiff = digitsBS - digitsTemp;
 
-            for( int d = 0; d < digitsDiff; d++ ){
+            for( int d = 0; d < digitsDiff - 1; d++ ){
                 printf( " " );
             }
 
@@ -420,4 +471,24 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE] ){
     }
 
     printf("\n");
+}
+
+// Flush input buffer
+void flush_input(){
+    int ch;
+    // Extract every value from the input buffer until a next line or end of file char is reached
+    while( (ch = getchar() ) != '\n' && ch != EOF);
+}
+
+// Check if every character in a string is digit or not
+bool stringDigit(char *str, int strlength){
+    int i = 0;
+    bool isDigit = 1;
+    while( i < strlength ){
+        if( !isdigit(str[i] ) )
+                isDigit = 0;
+        i++;
+    }
+
+    return isDigit;
 }
