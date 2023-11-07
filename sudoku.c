@@ -346,14 +346,14 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
         //create a horizontal line to distinguish the squares
         if( i % BOARDSQR == 0){
 
-            // TODO: Adjust this to print dynamic amount of spaces to acoomodate for the far left column
+            // Adjust this to print dynamic amount of spaces to acoomodate for the far left column
             // listing out the number of rows on the board
             temp = 0;
             do{
                 printf(" ");
                 temp++;
             } while( temp < digitsBS );
-            printf(" ");
+            printf("  ");
 
             //print out horizontal lines to distinguish squares
             for( int j = 0; j < BOARDSIZE; j++ ){
@@ -393,7 +393,7 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
             temp++;
         }
 
-        // TODO: Adjust number of spaces printed to make column align
+        // Print the row number next to the row for readability
         printf("%d ", BOARDSIZE - i);
 
         for( int j = 0; j < BOARDSIZE; j++ ){
@@ -410,14 +410,14 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
             temp = (int) puzzle[i][j];
             digitsTemp = 0;
 
-            do{
+            while((int) temp / 10 > 0){
                 temp = (int) temp / 10;
                 digitsTemp += 1;
-            }while((int) temp / 10 > 0);
+            }
 
             digitsDiff = digitsBS - digitsTemp;
 
-            for( int d = 0; d < digitsDiff - 1; d++ ){
+            for( int d = 0; d < digitsDiff-1; d++ ){
                 printf( " " );
             }
 
@@ -428,35 +428,40 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
         printf("\n");
     }
 
-    // TODO: Fix to print dynamic amount of spaces to acoomodate for the far left column
-    // listing out the number of rows on the board
+    // Print dynamic amount of spaces to acoomodate for the far left column
+    // listing out the number of rows on the board before writing out the columns of the baord
     temp = 0;
     do{
         printf(" ");
         temp++;
     } while( temp < digitsBS );
-    printf(" ");
+    printf("  ");
 
     //Print the row of values to represent the columns for the user to see
     for( int i = 1; i <= BOARDSIZE; i++ ){
 
         temp = i;
 
+        // Count the number of digits in the column number to dynamically
+        digitsTemp = 0;
+
         while( (int)( temp / 10 )> 0 ){
             temp = (int) temp / 10;  
             digitsTemp += 1;
         } 
 
+        // Calculate the differences in digits in the max board size and the current column number
         digitsDiff = digitsBS - digitsTemp;
 
         temp = 0;
 
+        // Print spaces to align the column number with the column width
         while( temp < digitsDiff ){
             printf(" ");
             temp++;
         }
 
-        printf(" %d", i);
+        printf("%d", i);
 
         //makes a space to create vertical lines between squares
         if( ( i - 1 ) % BOARDSQR == BOARDSQR - 1)
