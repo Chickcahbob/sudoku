@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <math.h>
-#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -55,12 +54,6 @@ int main(int argc, char *argv[]){
 	//Tell user the current size of the board.
 	//This may change to a dynamic user input, but I do not feel like bothering with it currently.
 	printf("The current size of the board is %dx%d.\n", BOARDSIZE, BOARDSIZE);
-
-	//Create a time value for the random number generator
-	time_t t;
-	
-	//set a random seed for random number generation
-	srand((unsigned) time(&t));
 
 	// Initialize blank puzzle
 	short int puzzle[BOARDSIZE][BOARDSIZE];
