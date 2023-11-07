@@ -48,6 +48,9 @@ void flush_input();
 // Check if every character in a string is digit or not
 bool stringDigit(char *str, int strlength);
 
+// Print the proper amount of spaces to align numbers
+void printSpaces( int i, int digitsBS, char delim );
+
 // ##### MAIN FUNCTION #####
 int main(int argc, char *argv[]){
 
@@ -66,14 +69,14 @@ int main(int argc, char *argv[]){
     // Initialize row col and value temp values
     int r = 0, c = 0, v = 1;
 
-
     int digitsBS = 0;
     int tempBS = BOARDSIZE;
 
     do{
         tempBS = (int) tempBS / 10;
         digitsBS += 1;
-    }while((int) tempBS / 10 > 0);
+        printf("%d\n", digitsBS );
+    }while((int) tempBS % 10 > 0);
 
     char input[digitsBS + 1];
 
@@ -93,13 +96,15 @@ int main(int argc, char *argv[]){
             // Get user input with an added char in buffer for the \0 character
 	        fgets( input, digitsBS + 1, stdin );
             // Flush any chars left in the buffer to avoid buffer overread 
+            printf("The input length is %d\n", strlen(input) );
             flush_input();
             // Check that every char in the string is a char
             validate = stringDigit(input, strlen(input) );
-            if( validate )
+            if( validate ){
                 // Convert the string to an int
                 c = atoi(input);
                 validate = ( c <= BOARDSIZE && c > 0 );
+            }
             if( !validate )
                 printf("Please input a number between 1 and %d.\n", BOARDSIZE );
         } while( !validate );
@@ -112,10 +117,11 @@ int main(int argc, char *argv[]){
             flush_input();
             // Check that every char in the string is a char
             validate = stringDigit(input, strlen(input) );
-            if( validate )
+            if( validate ){
                 // Convert the string to an int
                 r = atoi(input);
-                validate = ( c <= BOARDSIZE && c > 0 );
+                validate = ( r <= BOARDSIZE && r > 0 );
+            }
             if( !validate )
                 printf("Please input a number between 1 and %d.\n", BOARDSIZE);
         } while( !validate );
@@ -128,10 +134,11 @@ int main(int argc, char *argv[]){
             flush_input();
             // Check that every char in the string is a char
             validate = stringDigit(input, strlen(input) );
-            if( validate )
+            if( validate ){
                 // Convert the string to an int
                 v = atoi(input);
-                validate = ( c <= BOARDSIZE && c > 0 );
+                validate = ( v <= BOARDSIZE && v > 0 );
+            }
             if( !validate )
                 printf("Please input a number between 1 and %d.\n", BOARDSIZE);
         } while( !validate );
@@ -140,7 +147,8 @@ int main(int argc, char *argv[]){
         // Get user input with an added char in buffer for the \0 character
         fgets( input, 2, stdin );
         // Flush any chars left in the buffer to avoid buffer overread 
-        flush_input();
+        if( strlen(input) > 2 )
+            flush_input();
 
         // Add the user's value to the board
         puzzle[BOARDSIZE - r][c - 1] = v;
@@ -339,7 +347,6 @@ void solveBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
 void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
     int temp, tempBS, digitsTemp, digitsDiff;
 
-
     //prints board contents
     for( int i = 0; i < BOARDSIZE; i++ ){
         //If line is th efirst or any integer multiple of the sqrt of the size of the board
@@ -398,8 +405,9 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
 
         for( int j = 0; j < BOARDSIZE; j++ ){
 
+            printSpaces( puzzle[i][j], digitsBS, '|' );
             //prints | to visually distinguish integers from one another and then prints the integer
-            if( puzzle[i][j] > 0 ){
+            /*if( puzzle[i][j] > 0 ){
                 // Checks if there is a value at the current location and prints the value
                 printf( "|%d", puzzle[i][j] );
             } else {
@@ -419,7 +427,7 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
 
             for( int d = 0; d < digitsDiff-1; d++ ){
                 printf( " " );
-            }
+            }*/
 
             //Checks for the end of a square and then creates a vertical line to seperate them
             if( j % BOARDSQR == BOARDSQR - 1)
@@ -440,28 +448,8 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
     //Print the row of values to represent the columns for the user to see
     for( int i = 1; i <= BOARDSIZE; i++ ){
 
-        temp = i;
-
-        // Count the number of digits in the column number to dynamically
-        digitsTemp = 0;
-
-        while( (int)( temp / 10 )> 0 ){
-            temp = (int) temp / 10;  
-            digitsTemp += 1;
-        } 
-
-        // Calculate the differences in digits in the max board size and the current column number
-        digitsDiff = digitsBS - digitsTemp;
-
-        temp = 0;
-
-        // Print spaces to align the column number with the column width
-        while( temp < digitsDiff ){
-            printf(" ");
-            temp++;
-        }
-
-        printf("%d", i);
+        // Align and print column numbers under the board
+        printSpaces( i, digitsBS, ' ');
 
         //makes a space to create vertical lines between squares
         if( ( i - 1 ) % BOARDSQR == BOARDSQR - 1)
@@ -482,11 +470,41 @@ void flush_input(){
 bool stringDigit(char *str, int strlength){
     int i = 0;
     bool isDigit = 1;
-    while( i < strlength ){
+    while( i < strlength && str[i] != '\n' && str[i] != EOF){
         if( !isdigit(str[i] ) )
                 isDigit = 0;
         i++;
     }
 
     return isDigit;
+}
+
+void printSpaces( int i, int digitsBS, char delim ){
+    // Count the number of digits in the column number to dynamically
+    int digitsTemp = 0, digitsDiff = 0;
+    int temp = i;
+
+    do{
+        temp = (int) temp / 10;  
+        digitsTemp += 1;
+    }while( (int)( temp % 10 )> 0 );
+
+    // Calculate the differences in digits in the max board size and the current column number
+    digitsDiff = digitsBS - digitsTemp;
+
+    temp = 0;
+
+    // Print spaces to align the column number with the column width
+    
+
+    if( i != 0 ){
+        printf("%c%d", delim, i);
+    } else {
+        printf("%c ", delim);
+    }
+    
+    while( temp < digitsDiff ){
+        printf(" ");
+        temp++;
+    }
 }
