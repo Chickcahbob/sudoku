@@ -1,4 +1,4 @@
-# sudoku
+# Sudoku
 ## Exercise in getting back into coding
 ### sudoku.c
 This is the final result of the exercise.
