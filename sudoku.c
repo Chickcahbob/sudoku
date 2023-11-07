@@ -72,12 +72,15 @@ int main(int argc, char *argv[]){
     int digitsBS = 0;
     int tempBS = BOARDSIZE;
 
+    // Calculate the max number of digits for any value in the board
     do{
         tempBS = (int) tempBS / 10;
         digitsBS += 1;
         printf("%d\n", digitsBS );
     }while((int) tempBS % 10 > 0);
 
+    // Initialize an input array with max number of digits and 1 additional
+    // to accomodate for the '\0' char added by fgets()
     char input[digitsBS + 1];
 
     // Create a validator bit to ensure the user input is correct
@@ -103,6 +106,7 @@ int main(int argc, char *argv[]){
             if( validate ){
                 // Convert the string to an int
                 c = atoi(input);
+                // Check that the input value is a possible value
                 validate = ( c <= BOARDSIZE && c > 0 );
             }
             if( !validate )
@@ -120,6 +124,7 @@ int main(int argc, char *argv[]){
             if( validate ){
                 // Convert the string to an int
                 r = atoi(input);
+                // Check that the input value is a possible value
                 validate = ( r <= BOARDSIZE && r > 0 );
             }
             if( !validate )
@@ -137,13 +142,17 @@ int main(int argc, char *argv[]){
             if( validate ){
                 // Convert the string to an int
                 v = atoi(input);
-                validate = ( v <= BOARDSIZE && v > 0 );
+                // Check that the input value is a possible value
+                // Value can be 0 unlike rows and columns because it will reset the board
+                // in case there is an error
+                validate = ( v <= BOARDSIZE && v >= 0 );
             }
             if( !validate )
                 printf("Please input a number between 1 and %d.\n", BOARDSIZE);
         } while( !validate );
 
         printf("Type 'Y' or 'y' if you would like to solve the puzzle. Otherwise type any character to add another value to the table.\n");
+        printf("If your previous number was a misinput, you may replace it or remove it by putting the number 0 in that location instead.\n");
         // Get user input with an added char in buffer for the \0 character
         fgets( input, 2, stdin );
         // Flush any chars left in the buffer to avoid buffer overread 
@@ -152,8 +161,8 @@ int main(int argc, char *argv[]){
 
         // Add the user's value to the board
         puzzle[BOARDSIZE - r][c - 1] = v;
+        // Repeat requesting inputs until the user puts in a y value
         valUserData = ( input[0] == 'y' || input[0] == 'Y' );
-
     }
 
 	// Takes user inputs and places them in row column order from bottom left to top right
@@ -183,6 +192,7 @@ int main(int argc, char *argv[]){
 // Solve Board
 void solveBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
 
+    // Initialize variables to be used in function
 	short int curVal = 0, row = 0, col = 0;
 	int sqrRow, sqrCol, count = 0;
 	bool match;
@@ -387,13 +397,16 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
         temp = BOARDSIZE -  i;
         digitsTemp = 0;
 
+        // Calculates the number of digits in the row number
         while( (int)( temp / 10 )> 0 ){
           temp = (int) temp / 10;  
           digitsTemp += 1;
         } 
 
+        // Calculates the difference in digits between row number and max digits
         digitsDiff = digitsBS - digitsTemp;
 
+        // Print spaces to align row numbers in the far left column
         temp = 0;
         while( temp < digitsDiff){
             printf(" ");
@@ -403,31 +416,11 @@ void printBoard( short int puzzle[BOARDSIZE][BOARDSIZE], int digitsBS ){
         // Print the row number next to the row for readability
         printf("%d ", BOARDSIZE - i);
 
+        // Iterate through the columns
         for( int j = 0; j < BOARDSIZE; j++ ){
 
+            // Print out the proper spacing for numbers in the board, with the '|' character seperating them
             printSpaces( puzzle[i][j], digitsBS, '|' );
-            //prints | to visually distinguish integers from one another and then prints the integer
-            /*if( puzzle[i][j] > 0 ){
-                // Checks if there is a value at the current location and prints the value
-                printf( "|%d", puzzle[i][j] );
-            } else {
-                // If there is not a value at the current location, print a space
-                printf( "| " );
-            }
-
-            temp = (int) puzzle[i][j];
-            digitsTemp = 0;
-
-            while((int) temp / 10 > 0){
-                temp = (int) temp / 10;
-                digitsTemp += 1;
-            }
-
-            digitsDiff = digitsBS - digitsTemp;
-
-            for( int d = 0; d < digitsDiff-1; d++ ){
-                printf( " " );
-            }*/
 
             //Checks for the end of a square and then creates a vertical line to seperate them
             if( j % BOARDSQR == BOARDSQR - 1)
@@ -484,25 +477,26 @@ void printSpaces( int i, int digitsBS, char delim ){
     int digitsTemp = 0, digitsDiff = 0;
     int temp = i;
 
+    // Calculate the number of digits in the input number
     do{
         temp = (int) temp / 10;  
         digitsTemp += 1;
     }while( (int)( temp % 10 )> 0 );
 
-    // Calculate the differences in digits in the max board size and the current column number
+    // Calculate the differences in digits in the max board size and the current input size
     digitsDiff = digitsBS - digitsTemp;
 
+    //Ensure temp is at 0 to start counting the number of spaces
     temp = 0;
 
-    // Print spaces to align the column number with the column width
-    
-
+    // Print the deliminating character followed by the number
     if( i != 0 ){
         printf("%c%d", delim, i);
     } else {
         printf("%c ", delim);
     }
-    
+
+    // Print spaces to align the numbers into the proper columns 
     while( temp < digitsDiff ){
         printf(" ");
         temp++;
