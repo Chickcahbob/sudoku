@@ -76,7 +76,6 @@ int main(int argc, char *argv[]){
     do{
         tempBS = (int) tempBS / 10;
         digitsBS += 1;
-        printf("%d\n", digitsBS );
     }while((int) tempBS % 10 > 0);
 
     // Initialize an input array with max number of digits and 1 additional
@@ -99,7 +98,6 @@ int main(int argc, char *argv[]){
             // Get user input with an added char in buffer for the \0 character
 	        fgets( input, digitsBS + 1, stdin );
             // Flush any chars left in the buffer to avoid buffer overread 
-            printf("The input length is %d\n", strlen(input) );
             flush_input();
             // Check that every char in the string is a char
             validate = stringDigit(input, strlen(input) );
@@ -107,7 +105,7 @@ int main(int argc, char *argv[]){
                 // Convert the string to an int
                 c = atoi(input);
                 // Check that the input value is a possible value
-                validate = ( c <= BOARDSIZE && c > 0 );
+                validate = ( c <= BOARDSIZE  && c > 0 );
             }
             if( !validate )
                 printf("Please input a number between 1 and %d.\n", BOARDSIZE );
@@ -163,6 +161,7 @@ int main(int argc, char *argv[]){
         puzzle[BOARDSIZE - r][c - 1] = v;
         // Repeat requesting inputs until the user puts in a y value
         valUserData = ( input[0] == 'y' || input[0] == 'Y' );
+        flush_input();
     }
 
 	// Takes user inputs and places them in row column order from bottom left to top right
